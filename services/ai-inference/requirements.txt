@@ -1,0 +1,21 @@
+# ─── FastAPI AI Inference Service ───
+# Core
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+pydantic==2.10.*
+pydantic-settings==2.7.*
+python-dotenv==1.0.*
+
+# ML / NLP
+torch==2.6.*
+transformers==4.48.*
+scikit-learn==1.6.*
+numpy==2.2.*
+
+# Text processing
+beautifulsoup4==4.12.*
+requests==2.32.*
+newspaper3k==0.2.*
+
+# Utilities
+httpx==0.28.*

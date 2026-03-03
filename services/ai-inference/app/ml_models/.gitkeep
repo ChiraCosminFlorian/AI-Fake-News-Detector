@@ -1,0 +1,2 @@
+# ML model artifacts directory (.pt, .onnx, .bin files go here)
+# These files are git-ignored due to their large size.

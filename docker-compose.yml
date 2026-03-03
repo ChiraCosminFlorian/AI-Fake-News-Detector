@@ -1,0 +1,73 @@
+# Docker Compose - AI Fake News Detection Platform
+# Usage: docker-compose up --build
+
+version: "3.9"
+
+services:
+  # ---------- MongoDB ----------
+  mongo:
+    image: mongo:7
+    container_name: fnews-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-secret}
+    volumes:
+      - mongo-data:/data/db
+
+  # ---------- Core API (Node / Express) ----------
+  core-api:
+    build:
+      context: ./services/core-api
+      dockerfile: Dockerfile
+    container_name: fnews-core-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./services/core-api/.env
+    depends_on:
+      - mongo
+
+  # ---------- AI Inference (FastAPI) ----------
+  ai-inference:
+    build:
+      context: ./services/ai-inference
+      dockerfile: Dockerfile
+    container_name: fnews-ai-inference
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./services/ai-inference/.env
+    depends_on:
+      - core-api
+
+  # ---------- Web Client (React / Vite) ----------
+  web-client:
+    build:
+      context: ./apps/web-client
+      dockerfile: Dockerfile
+    container_name: fnews-web-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - core-api
+
+  # ---------- Admin Dashboard (React / Vite) ----------
+  admin-dashboard:
+    build:
+      context: ./apps/admin-dashboard
+      dockerfile: Dockerfile
+    container_name: fnews-admin-dashboard
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      - core-api
+
+volumes:
+  mongo-data:

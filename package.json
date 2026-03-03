@@ -1,0 +1,26 @@
+{
+    "name": "ai-fake-news-detector",
+    "version": "1.0.0",
+    "description": "MERN + FastAPI AI Fake News Detection Platform",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "services/core-api",
+        "shared"
+    ],
+    "scripts": {
+        "dev:client": "npm run dev --workspace=apps/web-client",
+        "dev:admin": "npm run dev --workspace=apps/admin-dashboard",
+        "dev:api": "npm run dev --workspace=services/core-api",
+        "dev:ai": "cd services/ai-inference && uvicorn app.main:app --reload --port 8000",
+        "dev": "concurrently \"npm:dev:api\" \"npm:dev:client\"",
+        "lint": "npm run lint --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present"
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
