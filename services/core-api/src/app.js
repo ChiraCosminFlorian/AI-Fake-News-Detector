@@ -49,7 +49,7 @@ app.get("/api/health", (_req, res) => {
 // ── Routes (will be added in next steps) ───────────────────
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/predictions", require("./routes/predictionRoutes"));
-// app.use("/api/admin",     require("./routes/adminRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 // ── 404 catch-all ──────────────────────────────────────────
 app.use((_req, res) => {
