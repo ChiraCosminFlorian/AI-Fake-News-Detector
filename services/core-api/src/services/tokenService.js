@@ -1,6 +1,8 @@
 // src/services/tokenService.js
 // Purpose: JWT generation, refresh-token persistence, and cleanup
 
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
+
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const RefreshToken = require("../models/RefreshToken");
