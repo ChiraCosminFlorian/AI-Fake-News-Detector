@@ -6,7 +6,9 @@
 //   - Mounts route placeholders (to be added later)
 //   - Registers the global error handler
 
-require("dotenv").config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+console.log('ENV PATH:', require('path').join(__dirname, '../.env'));
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
 
 const express = require("express");
 const cors = require("cors");
