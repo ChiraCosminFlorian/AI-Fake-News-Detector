@@ -11,6 +11,7 @@ torch==2.6.*
 transformers==4.48.*
 scikit-learn==1.6.*
 numpy==2.2.*
+shap==0.46.*
 
 # Text processing
 beautifulsoup4==4.12.*

@@ -86,10 +86,11 @@ export default function Dashboard() {
                         <ResultCard
                             prediction={{
                                 _id: result.id,
-                                text: result.textPreview || result.text || "",
+                                text: result.text || result.textPreview || "",
                                 url: result.url,
                                 label: result.label,
                                 confidence: result.confidence,
+                                highlights: result.highlights || [],
                                 createdAt: result.createdAt,
                                 isBookmarked: result.isBookmarked || false,
                                 feedback: result.feedback || null,

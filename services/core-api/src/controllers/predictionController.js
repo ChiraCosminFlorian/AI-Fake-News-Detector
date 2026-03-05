@@ -15,7 +15,7 @@ exports.analyzeText = async (req, res, next) => {
         }
 
         // Call FastAPI AI service
-        const { label, confidence } = await callAiService(text);
+        const { label, confidence, highlights } = await callAiService(text);
 
         // Persist prediction
         const prediction = await Prediction.create({
@@ -27,8 +27,10 @@ exports.analyzeText = async (req, res, next) => {
 
         res.status(201).json({
             id: prediction._id,
+            text,
             label,
             confidence,
+            highlights,
             createdAt: prediction.createdAt,
         });
     } catch (error) {
@@ -69,7 +71,7 @@ exports.analyzeUrl = async (req, res, next) => {
         }
 
         // Call FastAPI AI service
-        const { label, confidence } = await callAiService(articleText);
+        const { label, confidence, highlights } = await callAiService(articleText);
 
         // Persist prediction
         const prediction = await Prediction.create({
@@ -84,7 +86,9 @@ exports.analyzeUrl = async (req, res, next) => {
             id: prediction._id,
             label,
             confidence,
+            highlights,
             url,
+            text: articleText.substring(0, 500),
             textPreview: articleText.substring(0, 200) + "...",
             createdAt: prediction.createdAt,
         });

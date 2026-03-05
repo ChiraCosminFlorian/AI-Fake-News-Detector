@@ -9,7 +9,7 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
  * Send text to the FastAPI /predict endpoint and return the result.
  *
  * @param   {string} text  — cleaned article text
- * @returns {{ label: string, confidence: number }}
+ * @returns {{ label: string, confidence: number, highlights: Array }}
  */
 async function callAiService(text) {
     try {
@@ -22,6 +22,7 @@ async function callAiService(text) {
         return {
             label: response.data.label,
             confidence: response.data.confidence,
+            highlights: response.data.highlights || [],
         };
     } catch (error) {
         if (error.response) {
