@@ -2,8 +2,12 @@
 
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_ADMIN_API_URL
+    ? `${import.meta.env.VITE_ADMIN_API_URL}/api`
+    : "/api";
+
 const api = axios.create({
-    baseURL: "/api",
+    baseURL: API_BASE_URL,
     headers: { "Content-Type": "application/json" },
 });
 
@@ -41,7 +45,7 @@ api.interceptors.response.use(
             try {
                 const rt = localStorage.getItem("admin_refreshToken");
                 if (!rt) throw new Error("No refresh token");
-                const { data } = await axios.post("/api/auth/refresh", { refreshToken: rt });
+                const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken: rt });
                 localStorage.setItem("admin_accessToken", data.accessToken);
                 processQueue(null, data.accessToken);
                 orig.headers.Authorization = `Bearer ${data.accessToken}`;

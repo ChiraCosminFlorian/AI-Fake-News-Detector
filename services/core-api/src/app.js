@@ -24,7 +24,10 @@ const app = express();
 app.use(helmet());
 app.use(
     cors({
-        origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
+        origin: [
+            process.env.CLIENT_URL || "http://localhost:3000",
+            process.env.ADMIN_URL || "http://localhost:3001",
+        ].filter(Boolean),
         credentials: true, // allow cookies (refresh token)
     })
 );
