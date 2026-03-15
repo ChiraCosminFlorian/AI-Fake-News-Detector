@@ -36,13 +36,17 @@ ml_model = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load the ML model and SHAP explainer when the server starts."""
-    if not os.path.exists(MODEL_PATH):
-        raise RuntimeError(
-            f"Model file not found at {MODEL_PATH}. "
-            "Run  python training/train.py  first."
-        )
+    try:
+        pipeline = joblib.load(MODEL_PATH)
+        print(f"Model loaded from {MODEL_PATH}")
+    except Exception as e:
+        print(f"Model load failed ({e}), retraining...")
+        import subprocess
+        train_script = os.path.join(os.path.dirname(__file__), "..", "training", "train.py")
+        subprocess.run(["python", train_script], check=True, cwd=os.path.join(os.path.dirname(__file__), ".."))
+        pipeline = joblib.load(MODEL_PATH)
+        print(f"Model retrained and loaded from {MODEL_PATH}")
 
-    pipeline = joblib.load(MODEL_PATH)
     ml_model["pipeline"] = pipeline
 
     # Extract the TF-IDF vectorizer and classifier from the pipeline
