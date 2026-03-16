@@ -1,15 +1,19 @@
 // src/controllers/authController.js
-// Purpose: Authentication logic — register, login, refresh, logout
+// Purpose: Authentication logic — register, login, refresh, logout, verifyEmail
 
+const crypto = require("crypto");
 const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
 const jwt = require("jsonwebtoken");
+const { Resend } = require("resend");
 const {
     generateAccessToken,
     generateRefreshToken,
     saveRefreshToken,
     deleteRefreshToken,
 } = require("../services/tokenService");
+
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 // ── POST /api/auth/register ────────────────────────────────
 exports.register = async (req, res, next) => {
@@ -22,16 +26,71 @@ exports.register = async (req, res, next) => {
             return res.status(409).json({ error: "Email already registered" });
         }
 
-        // Create user (password is hashed by the pre-save hook in User model)
-        const user = await User.create({ name, email, password });
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString("hex");
 
-        // Placeholder for email verification (to be replaced with real email service)
-        console.log(`[EMAIL] Verification email would be sent to: ${email}`);
+        // Create user (password is hashed by the pre-save hook in User model)
+        const user = await User.create({
+            name,
+            email,
+            password,
+            isVerified: false,
+            verificationToken,
+        });
+
+        // Send verification email via Resend
+        const verifyUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/verify-email/${verificationToken}`;
+        try {
+            await resend.emails.send({
+                from: process.env.FROM_EMAIL || "FakeScope <noreply@fakescope.com>",
+                to: email,
+                subject: "Verify your FakeScope account",
+                html: `
+                    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+                        <h2 style="color: #4f46e5;">Welcome to FakeScope!</h2>
+                        <p>Hi ${name},</p>
+                        <p>Click the button below to verify your email address:</p>
+                        <a href="${verifyUrl}"
+                           style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px;
+                                  border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">
+                            Verify Email
+                        </a>
+                        <p style="color: #6b7280; font-size: 14px;">
+                            Or copy this link: <br/>
+                            <a href="${verifyUrl}" style="color: #4f46e5;">${verifyUrl}</a>
+                        </p>
+                    </div>
+                `,
+            });
+            console.log(`[EMAIL] Verification email sent to: ${email}`);
+        } catch (emailErr) {
+            console.error(`[EMAIL] Failed to send verification email:`, emailErr.message);
+        }
 
         res.status(201).json({
-            message: "User registered successfully. Please verify your email.",
+            message: "Account created! Please check your email to verify your account.",
             userId: user._id,
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ── GET /api/auth/verify-email/:token ─────────────────────
+exports.verifyEmail = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+
+        const user = await User.findOne({ verificationToken: token });
+        if (!user) {
+            return res.status(400).json({ error: "Invalid or expired verification link" });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        await user.save();
+
+        res.json({ message: "Email verified successfully! You can now sign in." });
     } catch (error) {
         next(error);
     }
@@ -51,6 +110,11 @@ exports.login = async (req, res, next) => {
         // Check if account is disabled by admin
         if (!user.isActive) {
             return res.status(403).json({ error: "Account has been disabled" });
+        }
+
+        // Check if email is verified
+        if (!user.isVerified) {
+            return res.status(403).json({ error: "Please verify your email first" });
         }
 
         // Verify password

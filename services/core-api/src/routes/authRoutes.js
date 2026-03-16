@@ -17,4 +17,7 @@ router.post("/refresh", authController.refresh);
 // POST /api/auth/logout    → deletes refresh token from DB
 router.post("/logout", authController.logout);
 
+// GET /api/auth/verify-email/:token → verify user email
+router.get("/verify-email/:token", authController.verifyEmail);
+
 module.exports = router;

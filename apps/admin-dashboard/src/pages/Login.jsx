@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/AuthContext";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
     const { login } = useAuth();
@@ -12,6 +12,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -53,10 +54,19 @@ export default function Login() {
                         </div>
                         <div>
                             <label className="mb-1.5 block text-sm font-medium text-gray-400">Password</label>
-                            <input
-                                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                                className="input-field" placeholder="••••••••" required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                                    className="input-field pr-10" placeholder="••••••••" required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-gray-300"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" disabled={loading} className="btn-primary w-full">
                             {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</> : "Sign in"}
